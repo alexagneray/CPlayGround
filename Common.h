@@ -6,6 +6,17 @@
 
 
 /**
+ * @brief Labellisation des enum.
+ * Une enum doit contenir une valeur finale commencant par le nom de l'enum suivi de _Count.
+ * Exemple pour l'enum EOutcome -> EOutcome_Count doit etre la derniere valeur de l'enum.
+ * 
+ */
+#define __I_LABELIZER_VAR_NAME g_EnumLabel
+#define LABELIZER_DEF(Enum) const char* _I_LABELIZER_VAR_NAME[ (Enum)_Count ];
+#define EXTERN_LABELIZER_DEF(Enum) extern LABELIZER_DEF( ##Enum )
+#define LABELIZER_ADD_VALUE(Enum, EnumVal, EnumLabel) _I_LABELIZER_VAR_NAME[##EnumVal] = ##EnumLabel;
+
+/**
  * Valeurs de retour des fonctions.
  * 
 */
@@ -17,10 +28,16 @@ typedef enum EOutcome
     EOC_ALREADY_EXISTS,
     EOC_INVALID_ARGUMENT,
     EOC_INTERNAL_ERROR,
-
+    EOutcome_Count
 } EOC;
 
+extern const char* g_OutcomeLabel[];
 
+/**
+ * @brief Donne le label de eOutcome.
+ * 
+ */
+#define OUTCOMEGETLABEL(eOutcome) g_OutcomeLabel[eOutcome]
 
 
 

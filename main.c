@@ -11,9 +11,11 @@
 #include <unistd.h>
 /** @} */
 
+// #include <CUnit/CUnit.h>
 
 #include "client.h"
 #include "server.h"
+#include "file.h"
 
 int main_test_client_server(int argc, char** argv)
 {
@@ -40,7 +42,14 @@ int main_test_client_server(int argc, char** argv)
 
 int main_test_descriptors(int argc, char** argv)
 {
-    
+    HFILE hFile;
+    EOC eoc;
+    eoc = file_create("HelloWorld.conf.olf", SimpleListFile, &hFile);
+
+    printf("%s\n",OUTCOMEGETLABEL(eoc));
+
+
+    file_create("HelloWorld", CoupleListFile, &hFile);
     return 0;
 }
 
