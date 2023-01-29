@@ -42,14 +42,27 @@ int main_test_client_server(int argc, char** argv)
 
 int main_test_descriptors(int argc, char** argv)
 {
-    HFILE hFile;
+    HFILE hFile = NULL;
     EOC eoc;
-    eoc = file_create("HelloWorld.conf.olf", SimpleListFile, &hFile);
+    eoc = file_create("HelloWorld", SimpleListFile, &hFile);
+    print_outcome(eoc);
+    
+    if(hFile)
+    {
+        file_close(&hFile);
+    }
+    
+    
+    eoc = file_open("HelloWorld", SimpleListFile, &hFile);
+    print_outcome(eoc);
+    
+    eoc = file_add_simple(hFile, "Hello world !");
+    print_outcome(eoc);
 
-    printf("%s\n",OUTCOMEGETLABEL(eoc));
-
-
-    file_create("HelloWorld", CoupleListFile, &hFile);
+    eoc = file_close(&hFile);
+    print_outcome(eoc);
+    
+    
     return 0;
 }
 

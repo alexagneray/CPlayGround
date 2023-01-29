@@ -28,8 +28,12 @@ typedef enum EOutcome
     EOC_ALREADY_EXISTS,
     EOC_INVALID_ARGUMENT,
     EOC_INTERNAL_ERROR,
+    EOC_WRONG_FILETYPE,
+    EOC_FILE_NOT_OPENED,
     EOutcome_Count
 } EOC;
+
+
 
 extern const char* g_OutcomeLabel[];
 
@@ -40,6 +44,7 @@ extern const char* g_OutcomeLabel[];
 #define OUTCOMEGETLABEL(eOutcome) g_OutcomeLabel[eOutcome]
 
 
+void print_outcome(EOC eoc);
 
 #define SUCCESS(Src,Msg) printf("[" #Src "] " #Msg "\n");
 #define ERROR(Src,Msg) fprintf(stderr, "[" #Src "]" #Msg "\n");

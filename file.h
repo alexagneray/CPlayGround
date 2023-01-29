@@ -27,6 +27,7 @@ typedef TFILEPTR HFILE;
 #define SETHFILEDESCRIPTOR(hFile, nFd) (hFile)->nDescriptor = nFd;
 #define SETHFILETYPE(hFile, eType) (hFile)->eFileType = eType;
 #define ALLOCHFILE(hFile) hFile = malloc(sizeof(TFILE));
+#define FREEHFILE(hFile) free(hFile)
 extern const char* g_fileTypeLabel[];
 extern const char* g_fileTypeExt[];
 
@@ -68,6 +69,10 @@ EOC file_open(const char* zFilename, EFILETYPE eFiletype, HFILE* hFile);
 /**
  * 
 */
-EOC file_close(HFILE hFile);
+EOC file_close(HFILE* hFile);
+
+EOC file_add_simple(HFILE hFile, const char* zElem);
+
+EOC file_add_couple(HFILE hFile, const char* zElemA, const char* zElemB);
 
 #endif // _FILE_H

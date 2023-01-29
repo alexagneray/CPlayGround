@@ -9,7 +9,9 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <unistd.h>
-
+#include <signal.h>
+#include <stdlib.h>
+#include <pthread.h>
 
 #define SERVER_ERROR(Msg) ERROR("SERVER", Msg)
 #define SERVER_SUCCESS(Msg) SUCCESS("SERVER", Msg)
@@ -41,7 +43,19 @@ typedef TCLIENTPTR HCLIENT;
 TCLIENTPTR s_Clients [_I_SERVER_MAX_CLIENTS_COUNT];
 
 
+void server_exit()
+{
+    SERVER_SUCCESS("Exiting server ...")
+    close(s_nServerSock);
+    pthread_exit(NULL);
+}
 
+void server_forced_exit(int code)
+{
+    SERVER_SUCCESS("Exiting server ...")
+    close(s_nServerSock);
+    exit(0);
+}
 bool server_check_shot(int nClientId, const TSHOT* pShot)
 {
     HCLIENT hClient = s_Clients[nClientId];
@@ -71,13 +85,14 @@ bool server_execute_command(enum ECmd eCmd, char* pBuffer)
     case Join:
         server_command_join();
         break;
-    
+    case Leave:
+        server_exit();
+        break;
     default:
         break;
     }
     return true;
 }
-
 
 bool server_net_init()
 {
@@ -87,7 +102,9 @@ bool server_net_init()
     
     struct addrinfo* pResults;
 
-    
+    signal(SIGTERM, &server_forced_exit);
+    signal(SIGINT, &server_forced_exit);
+    signal(SIGSTOP, &server_forced_exit);
     if((s_nServerSock = socket(AF_INET, SOCK_STREAM,IPPROTO_TCP)) < 0 )
     {
         SERVER_ERROR("Error during Socket creation.")
@@ -133,12 +150,17 @@ void server_handle_client(int nClientSocket)
     {
         // int nRecvBytes = recv(nClientSocket, &RecvShot, sizeof(struct TShot),MSG_PEEK | MSG_WAITALL);
         // if()
-        read(nClientSocket, &RecvShot, sizeof(struct TShot));
+        int ret = read(nClientSocket, &RecvShot, sizeof(struct TShot));
         
+        if(!ret)
+        {
+            SERVER_SUCCESS("The client exited.")
+            return;
+        }
 
 
         SERVER_FSUCCESS("Received Shot %s => %s",CMD_GET_LABEL(RecvShot.eCmd),RecvShot.Buffer);
-        sleep(1);
+        server_execute_command(RecvShot.eCmd, RecvShot.Buffer);
     }
 }
 
@@ -164,9 +186,12 @@ void* server_thread_main(void* pArg)
     else
     {
         SERVER_SUCCESS("Socket not initialized.")
+        return NULL;
     }
 
+    
     err = listen(s_nServerSock, 10);
+    SERVER_SUCCESS("Listening ...")
     err = errno;
     int nClientSocket;
 
