@@ -8,7 +8,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include "Common.h"
+#include <Common.h>
+#include <network_shot.h>
 
 #define CLIENT_ERROR(Msg) ERROR("CLIENT", Msg)
 #define CLIENT_SUCCESS(Msg) SUCCESS("CLIENT", Msg)
@@ -35,7 +36,7 @@ void* client_thread_main(void* pArg)
     }
 
 
-    err = connect(sock, &srv, sizeof(srv));
+    err = connect(sock, (const struct sockaddr *)&srv, sizeof(srv));
     if(err == -1)
     {
         CLIENT_ERROR("connect() >> FAILED")
@@ -50,11 +51,13 @@ void* client_thread_main(void* pArg)
     // send(nSocket, &SentShot, sizeof(struct TShot), MSG_DONTWAIT);
     write(sock, &SentShot, sizeof(struct TShot));
 
+    sleep(2);
     SentShot.eCmd = Tell;
     CLIENT_SUCCESS("Sending Tell")
     // send(nSocket, &SentShot, sizeof(struct TShot), MSG_DONTWAIT);
     write(sock, &SentShot, sizeof(struct TShot));
 
+    sleep(2);
     SentShot.eCmd = Leave;
     CLIENT_SUCCESS("Sending Leave")
     // send(nSocket, &SentShot, sizeof(struct TShot), MSG_DONTWAIT);

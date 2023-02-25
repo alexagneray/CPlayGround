@@ -1,7 +1,7 @@
 #ifndef SERVER_MSG_CONTAINER_H
 #define SERVER_MSG_CONTAINER_H
 
-#include "server_data.h"
+#include "../server_data_defines.h"
 #include <stdbool.h>
 
 #define SERVER_MSG_DATA_FOLDER SERVER_DATA_FOLDER "Msg"

@@ -1,5 +1,7 @@
 #include "server.h"
-#include "Common.h"
+#include <Common.h>
+#include <network_shot.h>
+
 #include "server_command.h"
 #include <string.h>
 #include <sys/socket.h>
@@ -13,34 +15,28 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+
+// Macros d'affichage du serveur
 #define SERVER_ERROR(Msg) ERROR("SERVER", Msg)
 #define SERVER_SUCCESS(Msg) SUCCESS("SERVER", Msg)
 #define SERVER_FSUCCESS(Msg,...) FSUCCESS("SUCCESS",Msg, ##__VA_ARGS__);
 #define SERVER_FERROR(Msg,...) FERROR("ERROR",Msg, ##__VA_ARGS__);
-static int s_nServerSock = -1; /**< Socket serveur */
 
-#define _I_SERVER_MAX_CLIENTS_COUNT 10
 
-/**
- * Enregistrement des informations d'un client.
-*/
-typedef struct TClient
-{
-    unsigned long long uTs; // Ts fourni par le client.
-    int nSeed; // Seed fourni par le client.
-    int nId; // Correspond à l'id dans le tableau client.
-    unsigned long long uLastAction; // Ts de la derniere action du client.
-} TCLIENT;
+int s_nServerSock = -1; /**< Socket serveur */
 
-typedef TCLIENT* TCLIENTPTR;
-typedef TCLIENTPTR HCLIENT;
 
-/**
- * Tableau des clients.
- * Un nombre de clients max est défini !
- * Lorsque le tableau est plein, on ne peut plus gérer de client.
-*/
 TCLIENTPTR s_Clients [_I_SERVER_MAX_CLIENTS_COUNT];
+
+pthread_mutex_t s_ClientsMutex;
+
+
+
+
+void* server_client_list_check_thread_main(void* pArgs)
+{
+    
+}
 
 
 void server_exit()
@@ -78,15 +74,24 @@ bool server_check_shot(int nClientId, const TSHOT* pShot)
 
 }
 
-bool server_execute_command(enum ECmd eCmd, char* pBuffer)
+bool server_execute_command(ECMD eCmd, char* pBuffer)
 {
     switch (eCmd)
     {
     case Join:
-        server_command_join();
+        server_command_join(pBuffer);
         break;
     case Leave:
         server_exit();
+        break;
+    case Tell:
+        server_command_tell(pBuffer);
+        break;
+    case AddMsg:
+        server_command_add_msg(pBuffer);
+        break;
+    case ReadMsg:
+        server_command_read_msg(pBuffer);
         break;
     default:
         break;
@@ -145,12 +150,12 @@ bool server_net_init()
 
 void server_handle_client(int nClientSocket)
 {
-    struct TShot RecvShot;
+    TSHOT RecvShot;
     while(1)
     {
         // int nRecvBytes = recv(nClientSocket, &RecvShot, sizeof(struct TShot),MSG_PEEK | MSG_WAITALL);
         // if()
-        int ret = read(nClientSocket, &RecvShot, sizeof(struct TShot));
+        int ret = read(nClientSocket, &RecvShot, sizeof(TSHOT));
         
         if(!ret)
         {

@@ -3,8 +3,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 
-
+ 
 /**
  * @brief Labellisation des enum.
  * Une enum doit contenir une valeur finale commencant par le nom de l'enum suivi de _Count.
@@ -16,20 +17,24 @@
 #define EXTERN_LABELIZER_DEF(Enum) extern LABELIZER_DEF( ##Enum )
 #define LABELIZER_ADD_VALUE(Enum, EnumVal, EnumLabel) _I_LABELIZER_VAR_NAME[##EnumVal] = ##EnumLabel;
 
+#define PRINTW(txt) wprintf(txt);
+
 /**
  * Valeurs de retour des fonctions.
  * 
 */
 typedef enum EOutcome
 {
-    EOC_OK,
-    EOC_NOK,
+    EOC_OK, /**< Succés **/
+    EOC_NOK, /**< **/
     EOC_UNKNOWN,
     EOC_ALREADY_EXISTS,
     EOC_INVALID_ARGUMENT,
     EOC_INTERNAL_ERROR,
     EOC_WRONG_FILETYPE,
     EOC_FILE_NOT_OPENED,
+    EOC_UNKNOWN_USER, /**< Utilisateur inconnu **/
+    EOC_UNKNOWN_ID, /**< Identifiant inconnu **/
     EOutcome_Count
 } EOC;
 
@@ -51,18 +56,20 @@ void print_outcome(EOC eoc);
 #define FSUCCESS(Src,Msg,...) printf("[" #Src "] " #Msg "\n", ##__VA_ARGS__);
 #define FERROR(Src,Msg,...) fprintf(stderr, "[" #Src "] "#Msg "\n", ##__VA_ARGS__);
 
-#define _I_SHOT_BUFFER_SIZE_ 512
 
-enum ECmd
+
+typedef enum ECmd
 {
     Join,
     Tell,
-    Leave
-};
+    Leave,
+    AddMsg,
+    ReadMsg
+} ECMD;
 
 /**
  * Structure en-tête de commande.
- * Envoyée juste après le ECmd dans le buffer.
+ * Envoyée juste après le ECMD dans le buffer.
 */
 typedef struct TShotCheck
 {
@@ -91,10 +98,5 @@ extern const char* g_CmdLabel [];
 
 #define CMD_GET_LABEL(eCmd) g_CmdLabel[eCmd]
 
-typedef struct TShot
-{
-    enum ECmd eCmd;
-    TSHOTCHECK CmdCheck;
-    char Buffer[_I_SHOT_BUFFER_SIZE_];
-} TSHOT;
+
 #endif // _COMMON_H

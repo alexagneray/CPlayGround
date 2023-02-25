@@ -3,14 +3,21 @@
 
 #include <stdbool.h>
 
-bool server_command_join();
+/**
+ * @brief Command process functions.
+ *  
+ * @param pBuffer The data received for the command execution. 
+ * @return true 
+ * @return false 
+ */
+bool server_command_join(char* pBuffer);
 
-bool server_command_tell();
+bool server_command_tell(char* pBuffer);
 
-bool server_command_leave();
+bool server_command_leave(char* pBuffer);
 
-bool server_add_msg();
+bool server_command_add_msg(char* pBuffer);
 
-bool server_read_msg();
+bool server_command_read_msg(char* pBuffer);
 
 #endif // _SERVER_COMMAND_H
